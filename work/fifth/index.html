@@ -86,17 +86,55 @@
     <script>
       // 今回やるのはソート機能です。
       // selectボックスをクリックして言語を選び、その言語と関係のあるリストだけが表示されるプログラムです。
+      $(function(){
+        $('.select').change(function(){
+          var value = $(this).val();
+          if(value === 'all'){
+            $('ul.list li').show();
+          }else {
+            $('ul.list li').each(function(index,element){
+              if($(element).data('category-type') === value){
+                $(element).show();
+              }else {
+                $(element).hide();
+              }
+            });
+          }
+        });
+      });
+      // .change()
+      //   セレクトボックスの値の変更をキャッチ
+      // value = $(this).val();
+      //   セレクトボックスのvalueを取得し代入
+      // if(value === 'all')
+      //   allのvalueを選択した際には全て表示される
+      // else
+      //   そうでなかった場合は、
+      // $("element")
+      //   特定の要素名を持つすべての要素を選択し
+      // $().each(引数,引数)
+      //   第１引数には配列の場合はインデックスが順番に代入
+      //   第２引数にはそれぞれのオブジェクト値が順番に代入
+      // .data('category-type') === value
+      //   category-typeクラスとセレクトボックスのvalueが一致している物を
+      // .show
+      //   の記述で表示させている
+      // .hide
+      //   一致していなければ非表示となる
+
+
       // [処理の流れ]
       // ・セレクトボックスをクリックする。
       // ・セレクトボックスのvalueとliのdata-category-typeが一致しているものをだけ表示させる。
       // ・Allを選択した場合のみ全てのliを表示させる。
+
       // [使うメソッド]
-      // .show() 要素を表示させる
-      // .hide() 要素を隠す
-      // .val() 要素のvalueを取得
-      // .data('') DOM要素にあるdata-~を取得できる
       // .change() セレクトボックスの値の変更をキャッチする関数
+      // .val() 要素のvalueを取得
+      // .show() 要素を表示させる
       // $().each() DOM要素を1つずつループ処理をする（ループ内で$(this)を使うと要素がひとつずつ取得できる）
+      // .data('') DOM要素にあるdata-~を取得できる
+      // .hide() 要素を隠す
     </script>
   </body>
 </html>
