@@ -87,6 +87,144 @@
       //     <a class="btn-item" data-js="page-next" href="">次へ</a>
       //   </div>
       // </div>
+
+      $(function() {
+        
+        var success = function(data) {// 検索
+          var itemsList = data.Items;// Itemsで取得されたデータの命名変換
+          // var test = '';// 検索ワード
+          showList(itemsList);
+          addPager();
+        }
+        
+        var value = '';// showListで取得するデータの初期値
+        var page = 1;// ページ数の初期値
+        var maxPage = 0;// totalページ数の初期値
+        var contentPerPage = 20;// １ページに表示させるitem数上限
+        
+        // エラーメッセージ表示箇所
+        var appendErrorMessage = function(text) {
+          $('.message').append('<p class="error-message">' + text + '</p>');
+          // 指定したclassの要素に表示
+        }
+        
+        // エラーメッセージ内容
+        var errorMessage = function(status) {
+          switch (status) {
+            case 0:
+              appendErrorMessage('通信に失敗しました。インターネットの接続をご確認ください。');
+              break;
+            case 400:
+              appendErrorMessage('検索文字が入力されていません。');
+              break;
+            case 429:
+              appendErrorMessage('リクエスト過多です。しばらく時間を置いてからお試しください。');
+              break;
+            default:
+              appendErrorMessage('原因不明のエラーが発生しました。');
+            return
+          }
+        }
+        
+        // 検索結果表示をリセット (後から追加された。動的要素)
+        var resetHtml = function() {
+          $('.lists').empty();
+          $('.message').empty();
+          $('.pager').remove();
+        }
+        
+        // 取得データの表示
+        var showList = function(itemsList) {
+          var appendHtml = '';
+          $.each(itemsList, function(index, value) {
+            var item = value.Item;// 取得されたvalue.Itemを命名変換
+            var addHtml = '<li class="lists__item">' +
+                            '<div class="lists__item__inner">' +
+                              '<a href="' + item.itemUrl+ '" class="lists__item__link" target="_blank">' +
+                                '<img src="' + item.largeImageUrl + '" class="lists__item__img" alt="">' +
+                                '<p class="lists__item__detail">作品名：' + item.title + '</p>' +
+                                '<p class="lists__item__detail">作者　：' + item.author + '</p>' +
+                                '<p class="lists__item__detail">出版社：' + item.publisherName + '</p>' +
+                              '</a>' +
+                            '</div>' +
+                          '</li>';
+            appendHtml += addHtml;// DOM操作を一回にしている
+          });
+          $('.lists').append(appendHtml);// 指定したclassの要素に表示
+        }
+        
+        // 前へ・次へボタン
+        var addPager = function() {
+          $('.lists').after(// 指定したclassの要素に表示
+            '<div class="pager" data-js="pager">' +
+              '<div class="counter">' +
+                '<span class="counter-current">'+ page + '</span>/<span class="counter-all">' + maxPage + '</span>' +
+              '</div>' +
+            '<div class="btn-wrapper">'+
+              '<a class="btn-item" data-js="page-prev" href="">前へ</a>' +
+              '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
+            '</div>'
+          );
+          if (page === 1) {
+            $('[data-js="page-prev"]').addClass('disabled');// 1ページ目は前へボタン無効
+          }
+          if (page === maxPage) {
+            $('[data-js="page-next"]').addClass('disabled');// 最終ページは次へボタン無効
+          }
+        }
+
+        // 非同期通信処理
+        var ajaxCommunication = function() {
+          resetHtml();
+          $.ajax({
+            url: 'https://app.rakuten.co.jp/services/api/BooksTotal/Search/20130522',
+            type: 'GET',
+            datatype: 'json',
+            data: {// リクエストパラメーター
+              applicationId: appId,
+              booksGenreId: '001',
+              keyword: value,
+              hits: contentPerPage,
+              page: page
+            },
+          }).done(function(data) {// ↓データ取得後の動き
+            if(data.count === 0) {// ヒット件数が0の時のメッセージ
+              appendErrorMessage('検索結果が見つかりませんでした。<br>別のキーワードで検索して下さい。')
+              return false;
+            }
+            maxPage = data.pageCount;// 総ページ数
+            success(data);// 検索
+          }).fail(function (jqXHR) {
+            errorMessage(jqXHR.status);// HTTP-statusを参照してエラーメッセージを出力
+          });
+        }
+
+        // 検索ボタンをクリック
+        $('[data-js="search-btn"]').click(function() {
+          value = $('[data-js="search-word"]').val();
+          ajaxCommunication();// 非同期通信処理
+        });
+        $(document).on('click', '[data-js="page-next"]', function(event) {
+          event.preventDefault();// 指定要素のイベントをキャンセル
+          if (page === maxPage) {// 最終ページの時
+            return false
+          }
+          page++;// 次のページ数表示
+          ajaxCommunication();// 非同期通信処理
+        });
+        $(document).on('click', '[data-js="page-prev"]', function(event) {
+          event.preventDefault();// 指定要素のイベントをキャンセル
+          if (page === 1) {// 1ページ目の時
+            return false
+          }
+          page--;// 前のページ数表示
+          ajaxCommunication();// 非同期通信処理
+        });
+      });
     </script>
   </body>
 </html>
+
+
+<!-- APIとは、「関数」呼び出しがURLを叩くことであること -->
+<!-- 依存度が高い。 -->
