@@ -213,7 +213,7 @@
         });
         $(document).on('click', '[data-js="page-prev"]', function(event) {
           event.preventDefault();// 指定要素のイベントをキャンセル
-          if (page === 1) {// 1ページ目の時
+          if (page === FIRST_PAGE) {// 1ページ目の時
             return false
           }
           page--;// 前のページ数表示
