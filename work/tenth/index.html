@@ -99,7 +99,8 @@
         var value = '';// showListで取得するデータの初期値
         var page = 1;// ページ数の初期値
         var maxPage = 0;// totalページ数の初期値
-        var contentPerPage = 20;// １ページに表示させるitem数上限
+        var FIRST_PAGE = 1;// マジックナンバー 1ページ目
+        var CONTENT_PER_PAGE = 20;// １ページに表示させるitem数上限
         
         // エラーメッセージ表示箇所
         var appendErrorMessage = function(text) {
@@ -137,7 +138,7 @@
           var appendHtml = '';
           $.each(itemsList, function(index, value) {
             var item = value.Item;// 取得されたvalue.Itemを命名変換
-            var addHtml = '<li class="lists__item">' +
+            appendHtml += '<li class="lists__item">' +
                             '<div class="lists__item__inner">' +
                               '<a href="' + item.itemUrl+ '" class="lists__item__link" target="_blank">' +
                                 '<img src="' + item.largeImageUrl + '" class="lists__item__img" alt="">' +
@@ -147,7 +148,6 @@
                               '</a>' +
                             '</div>' +
                           '</li>';
-            appendHtml += addHtml;// DOM操作を一回にしている
           });
           $('.lists').append(appendHtml);// 指定したclassの要素に表示
         }
@@ -164,7 +164,7 @@
               '<a class="btn-item" data-js="page-next" href="">次へ</a>' +
             '</div>'
           );
-          if (page === 1) {
+          if (page === FIRST_PAGE) {
             $('[data-js="page-prev"]').addClass('disabled');// 1ページ目は前へボタン無効
           }
           if (page === maxPage) {
@@ -183,7 +183,7 @@
               applicationId: appId,
               booksGenreId: '001',
               keyword: value,
-              hits: contentPerPage,
+              hits: CONTENT_PER_PAGE,
               page: page
             },
           }).done(function(data) {// ↓データ取得後の動き
